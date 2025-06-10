@@ -12,14 +12,12 @@ class Main {
 
         if(answer.equals("y")) {
             System.out.println("Prepare to start.");
-            Thread.currentThread().sleep(1000);
-            System.out.println("3");
-            Thread.currentThread().sleep(1000);
-            System.out.println("2");
-            Thread.currentThread().sleep(1000);
-            System.out.println("1");
-            Thread.currentThread().sleep(1000);
-            System.out.println("0");
+
+            for(int i = 3; i >= 0; i--) {
+                System.out.println(i);
+                Thread.sleep(1000);
+            }
+
             while(true){
                 String currentPhrase = Vocabulary.randomizePhrase(Vocabulary.basicVocabulary());
 
@@ -31,18 +29,25 @@ class Main {
 
                 String userInput = sc.nextLine();
 
+                if(userInput.equals("exit")) {
+                    System.out.println("");
+                    System.out.println("BB!");
+                    Thread.sleep(1000);
+                    sc.close();
+                    System.exit(0);
+                }
+
                 long endTime = System.currentTimeMillis();
 
                 double timeElapsed = (endTime - startTime) / 1000.0;
 
                 double symbolPerMinute = (lengthOfPhrase / timeElapsed) * 60;
 
-                if (currentPhrase.equals(userInput.trim())) {
+                if (ValidatePhrase.validatePhrase(currentPhrase, userInput.trim())) {
                     System.out.println(timeElapsed + " s");
                     System.out.println("TPM " + symbolPerMinute);
-                } else {
-                    System.out.println("Phrases don't match");
                 }
+                System.out.println("");
             }
 
         } else {
