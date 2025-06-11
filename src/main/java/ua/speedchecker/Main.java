@@ -3,57 +3,71 @@ package ua.speedchecker;
 import java.util.Scanner;
 
 class Main {
+    private static CliHandler cliHandler;
+
     public static void main(String[] args) throws InterruptedException {
-        Scanner sc = new Scanner(System.in);
+        cliHandler = new CliHandler(new Scanner(System.in));
+        CountSPM count = new CountSPM();
 
-        System.out.println("Hello, are you ready to start? (y/n)");
+        String answer = cliHandler.getUserInput("Hello, are you ready to start? (Y/n)");
 
-        String answer = sc.nextLine();
-
-        if(answer.equals("y")) {
+        if (answer.equalsIgnoreCase("y")) {
             System.out.println("Prepare to start.");
+            countdown();
 
-            for(int i = 3; i >= 0; i--) {
-                System.out.println(i);
-                Thread.sleep(1000);
-            }
-
-            while(true){
+            while (true) {
                 String currentPhrase = Vocabulary.randomizePhrase(Vocabulary.basicVocabulary());
+                long startTime, endTime;
+                String userInput;
+                int lengthOfPhrase;
+                double timeElapsed, SPM;
 
-                int lengthOfPhrase = currentPhrase.length();
+                while (true) {
+                    startTime = System.currentTimeMillis();
 
-                long startTime = System.currentTimeMillis();
+                    userInput = cliHandler.getUserInput(currentPhrase);
 
-                System.out.println(currentPhrase);
+                    if (exitCommand(userInput)) {
+                        close();
+                    }
 
-                String userInput = sc.nextLine();
+                    endTime = System.currentTimeMillis();
+                    lengthOfPhrase = currentPhrase.length();
 
-                if(userInput.equals("exit")) {
+                    if (ValidatePhrase.validatePhrase(currentPhrase, userInput.trim())) {
+                        timeElapsed = count.timeElapsed(startTime, endTime);
+                        SPM = count.countSpm(lengthOfPhrase, timeElapsed);
+
+                        System.out.println(timeElapsed + " s");
+                        System.out.println("TPM " + SPM);
+                        break;
+                    }
                     System.out.println("");
-                    System.out.println("BB!");
-                    Thread.sleep(1000);
-                    sc.close();
-                    System.exit(0);
                 }
-
-                long endTime = System.currentTimeMillis();
-
-                double timeElapsed = (endTime - startTime) / 1000.0;
-
-                double symbolPerMinute = (lengthOfPhrase / timeElapsed) * 60;
-
-                if (ValidatePhrase.validatePhrase(currentPhrase, userInput.trim())) {
-                    System.out.println(timeElapsed + " s");
-                    System.out.println("TPM " + symbolPerMinute);
-                }
-                System.out.println("");
             }
 
         } else {
-            System.out.println("Ok, bye");
-            Thread.currentThread().sleep(1000);
+            close();
         }
 
+    }
+
+    private static boolean exitCommand(String userInput) {
+        return userInput.equals("exit") || userInput.equals("close");
+    }
+
+    private static void close() throws InterruptedException {
+        System.out.println("");
+        System.out.println("Ok, bye");
+        cliHandler.scannerClose();
+        Thread.sleep(1000);
+        System.exit(0);
+    }
+
+    private static void countdown() throws InterruptedException {
+        for (int i = 3; i >= 0; i--) {
+            System.out.println(i);
+            Thread.sleep(1000);
+        }
     }
 }
